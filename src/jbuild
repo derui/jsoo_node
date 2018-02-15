@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+ ((name jsoo_node)
+  (public_name jsoo_node)
+  (libraries (js_of_ocaml))
+  (preprocess (pps (js_of_ocaml-ppx)))))
