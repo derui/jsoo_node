@@ -12,7 +12,7 @@ This library provides small bindings for NodeJS to use with js\_of\_ocaml.
 
    ```shell
    $ cd path_to_jsoo_node
-   $ opam pin add jsoo_node .
+   $ opam pin -k git add jsoo_node .
    $ opam install jsoo_node
    ```
 
@@ -25,6 +25,16 @@ This library provides small bindings for NodeJS to use with js\_of\_ocaml.
    ```
 
 ## Development ##
+
+### Install ###
+
+1. clone this repository
+2. clone ``mocha_of_ocaml``
+3. execute command
+
+    ```shell
+    npm install
+    ```
 
 ### Build ###
 
