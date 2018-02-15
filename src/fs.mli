@@ -48,7 +48,7 @@ val stat_to_obj : stat Js.t -> stat_obj Js.t
 (** The type for nodejs's fs module *)
 class type t = object
   method lstatSync : Js.js_string Js.t -> stat Js.t Js.meth
-  method readFileSync : Js.js_string Js.t -> Js.js_string Js.t Js.t Js.meth
+  method readFileSync : Js.js_string Js.t -> Js.js_string Js.t Js.meth
   method readdirSync : Js.js_string Js.t -> Js.js_string Js.t Js.js_array Js.t Js.meth
   method readlinkSync : Js.js_string Js.t -> Js.js_string Js.t Js.meth
   method statSync : Js.js_string Js.t -> stat Js.t Js.meth

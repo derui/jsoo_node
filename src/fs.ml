@@ -71,7 +71,7 @@ class type t = object
   method lstatSync: js_string Js.t -> stat Js.t meth
   method readlinkSync: js_string Js.t -> js_string Js.t meth
   method readdirSync: js_string Js.t -> js_string Js.t js_array Js.t meth
-  method readFileSync: js_string Js.t -> js_string Js.t Js.t meth
+  method readFileSync: js_string Js.t -> js_string Js.t meth
 end
 
 let t : unit -> t Js.t = fun () -> Inner_util.require "fs"
