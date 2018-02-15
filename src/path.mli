@@ -1,9 +1,8 @@
-(** Bindings for nodejs's path module *)
-class type t = object
-  method join : Js.js_string Js.t Js.js_array Js.t -> Js.js_string Js.t Js.meth
-  method resolve : Js.js_string Js.t Js.js_array Js.t -> Js.js_string Js.t Js.meth
-  method sep: Js.js_string Js.t Js.readonly_prop
-end
+(** Bindings for nodejs's path module.
+    This library would not provide raw bindings such as [path##join ...]. Provide only OCaml friendly
+    interface instead.
+*)
 
-(** return path module. *)
-val t : unit -> t Js.t
+val join: string list -> string
+val resolve: string list -> string
+val sep: string

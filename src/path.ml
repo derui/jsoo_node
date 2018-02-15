@@ -1,21 +1,21 @@
 (** Bindings for nodejs's path module *)
 
 class type t = object
-  method resolve: Js.js_string Js.t Js.js_array Js.t -> Js.js_string Js.t Js.meth
-  method join: Js.js_string Js.t Js.js_array Js.t -> Js.js_string Js.t Js.meth
   method sep: Js.js_string Js.t Js.readonly_prop
 end
 
-let t : unit -> t Js.t = fun () ->
-  let original = Inner_util.require "path" in
-  object%js
-    method resolve = fun v ->
-      let v = Js.to_array v |> Array.map Js.Unsafe.inject in
-      Js.Unsafe.fun_call (Js.Unsafe.get original "resolve") v
+let t : unit -> t Js.t = fun () -> Inner_util.require "path"
 
-    method join = fun v ->
-      let v = Js.to_array v |> Array.map Js.Unsafe.inject in
-      Js.Unsafe.fun_call (Js.Unsafe.get original "join") v
+let call_path_func name args =
+  let path = t () in
+  Js.Unsafe.fun_call (Js.Unsafe.get path name) args
 
-    val sep = original##.sep
-  end
+let join paths =
+  let paths = Array.of_list paths |> Array.map Js.string |> Array.map Js.Unsafe.inject in
+  call_path_func "join" paths |> Js.to_string
+
+let resolve paths =
+  let paths = Array.of_list paths |> Array.map Js.string |> Array.map Js.Unsafe.inject in
+  call_path_func "resolve" paths |> Js.to_string
+
+let sep = let path = t () in Js.to_string path##.sep

@@ -1,4 +1,7 @@
-(** Bindings for nodejs's fs module. *)
+(** Bindings for nodejs's fs module.
+    This library would not provide raw bindings such as [path##join ...]. Provide only OCaml friendly
+    interface instead.
+*)
 
 class type stat = object
   method atime : Js.date Js.t Js.readonly_prop
@@ -45,14 +48,8 @@ end
 (** Convert stat class to plain javascript object *)
 val stat_to_obj : stat Js.t -> stat_obj Js.t
 
-(** The type for nodejs's fs module *)
-class type t = object
-  method lstatSync : Js.js_string Js.t -> stat Js.t Js.meth
-  method readFileSync : Js.js_string Js.t -> Js.js_string Js.t Js.meth
-  method readdirSync : Js.js_string Js.t -> Js.js_string Js.t Js.js_array Js.t Js.meth
-  method readlinkSync : Js.js_string Js.t -> Js.js_string Js.t Js.meth
-  method statSync : Js.js_string Js.t -> stat Js.t Js.meth
-end
-
-(** return fs module *)
-val t : unit -> t Js.t
+val lstatSync : string -> stat Js.t
+val readFileSync : string -> string
+val readdirSync : string -> string array
+val readlinkSync : string -> string
+val statSync : string -> stat Js.t
