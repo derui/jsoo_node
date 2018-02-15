@@ -4,9 +4,9 @@ version: "0.1.0"
 maintainer: "derutakayu@gmail.com"
 authors: "derui"
 license: "MIT"
-homepage: ""
-bug-reports: ""
-dev-repo: ""
+homepage: "https://github.com/derui/jsoo_node"
+bug-reports: "https://github.com/derui/jsoo_node/issues"
+dev-repo: "https://github.com/derui/jsoo_node"
 tags: []
 build: [
   "jbuilder" "build" "-p" name "-j" jobs
