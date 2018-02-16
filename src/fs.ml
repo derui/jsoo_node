@@ -2,7 +2,9 @@
 open Js
 module T = Fs_types
 
-let t : unit -> T.t Js.t = fun () -> Inner_util.require "fs"
+let fs : unit -> T.t Js.t = fun () -> Inner_util.require "fs"
+
+module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
 
 (* Convert Stats class to pure json *)
 let stat_to_obj t = object%js
@@ -32,34 +34,34 @@ let wrap_error f =
   with e -> Pervasives.Error e
 
 let lstatSync path =
-  let fs = t () in
+  let fs = Fs.instance in
   wrap_error (fun () -> fs##lstatSync (Js.string path))
 
-let readFileSync path = let fs = t () in
+let readFileSync path = let fs = Fs.instance in
   wrap_error @@ fun () ->
   let buffer = fs##readFileSync (Js.string path) in
   Js.to_string buffer##toString
 
 let readdirSync path =
-  let fs = t () in
+  let fs = Fs.instance in
   wrap_error @@ fun () -> fs##readdirSync (Js.string path) |> Js.to_array |> Array.map Js.to_string
 
 let readlinkSync path =
-  let fs = t () in
+  let fs = Fs.instance in
   wrap_error @@ fun () -> fs##readlinkSync (Js.string path) |> Js.to_string
 
 let statSync path =
-  let fs = t () in
+  let fs = Fs.instance in
   wrap_error (fun () -> fs##statSync (Js.string path))
 
 let writeFileSync path data =
-  let fs = t () in
+  let fs = Fs.instance in
   wrap_error @@ fun () -> fs##writeFileSync (Js.string path) (Js.string data)
 
-let mkdirSync path = let fs = t () in wrap_error @@ fun () -> fs##mkdirSync (Js.string path)
-let rmdirSync path = let fs = t () in wrap_error @@ fun () -> fs##rmdirSync (Js.string path)
-let unlinkSync path = let fs = t () in wrap_error @@ fun () -> fs##unlinkSync (Js.string path)
-let existsSync path = let fs = t () in fs##existsSync (Js.string path) |> Js.to_bool
+let mkdirSync path = let fs = Fs.instance in wrap_error @@ fun () -> fs##mkdirSync (Js.string path)
+let rmdirSync path = let fs = Fs.instance in wrap_error @@ fun () -> fs##rmdirSync (Js.string path)
+let unlinkSync path = let fs = Fs.instance in wrap_error @@ fun () -> fs##unlinkSync (Js.string path)
+let existsSync path = let fs = Fs.instance in fs##existsSync (Js.string path) |> Js.to_bool
 
 let mode_to_int list =
   List.fold_left (fun v mode ->
@@ -106,7 +108,7 @@ let copy_file ?mode ~src ~dest () =
     | None -> mode_to_int [`AllowOwnerRead;`AllowOwnerWrite; `AllowGroupRead;`AllowGroupWrite;`AllowOthersRead]
     | Some mode -> mode_to_int mode
   in
-  let fs = t () in
+  let fs = Fs.instance in
   let r = fs##createReadStream Js.(string src) Js.Optdef.empty
   and w = fs##createWriteStream Js.(string dest) Js.Optdef.(
       return (object%js
@@ -129,3 +131,9 @@ let copy_file ?mode ~src ~dest () =
   r##pipe w |> ignore;
 
   wait
+
+  end
+
+include Make(struct
+    let instance = fs ()
+  end)

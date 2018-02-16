@@ -45,3 +45,6 @@ val copy_file:
 
 (** Remove file/directory all. *)
 val remove_sync: string -> (unit, exn) result
+
+
+module Make(Fs:Fs_intf.Instance) : Fs_intf.S
