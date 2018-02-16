@@ -53,3 +53,26 @@ val readFileSync : string -> string
 val readdirSync : string -> string array
 val readlinkSync : string -> string
 val statSync : string -> stat Js.t
+val writeFileSync: string -> string -> unit
+val mkdirSync: string -> unit
+val rmdirSync: string -> unit
+val unlinkSync: string -> unit
+val removeSync: string -> unit
+
+(** Copy src file to dest *)
+val copyFile:
+  ?mode:[ `AllowOwnerRead
+        | `AllowOwnerWrite
+        | `AllowOwnerExec
+        | `AllowOwnerAll
+        | `AllowGroupRead
+        | `AllowGroupWrite
+        | `AllowGroupExec
+        | `AllowGroupAll
+        | `AllowOthersRead
+        | `AllowOthersWrite
+        | `AllowOthersExec
+        | `AllowOthersAll
+        ] list
+  -> src:string -> dest:string
+  -> unit -> (unit, [> `FsCopyError of string]) result Lwt.t

@@ -21,4 +21,20 @@ let suite () =
         let list = Array.to_list v in
         assert_ok @@ List.mem "fs.ml" list
       );
+    "should be able to copy a src to other" >:- (fun () ->
+        let dir = J.Path.resolve [".";"tmp"] in
+        Lwt.finalize (fun () ->
+
+            let src = J.Path.join [dir;"copy_src.txt"]
+            and dest = J.Path.join [dir;"copy_dest.txt"] in
+            J.Fs.mkdirSync dir;
+            J.Fs.writeFileSync src "data" ;
+            let open Lwt.Infix in
+            J.Fs.copyFile ~src ~dest () >>= fun ret ->
+            let open Infix in
+            let data = J.Fs.readFileSync dest |> Js.string in
+            Lwt.return @@ (assert_ok (ret = Ok ()) <|> assert_eq Js.(string "data") data)
+          )
+          (fun () -> Lwt.return @@ J.Fs.removeSync dir)
+      )
   ]

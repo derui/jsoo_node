@@ -76,6 +76,19 @@ module Option = struct
     method start: int Js.t Js.optdef Js.readonly_prop
     method _end: int Js.t Js.optdef Js.readonly_prop
   end
+
+  class type create_write_stream = object
+    method flags: Js.js_string Js.t Js.optdef Js.readonly_prop
+    method encoding: Js.js_string Js.t Js.optdef Js.readonly_prop
+    method fd: int Js.optdef Js.readonly_prop
+    method mode: int Js.optdef Js.readonly_prop
+    method autoClose: bool Js.t Js.optdef Js.readonly_prop
+    method start: int Js.t Js.optdef Js.readonly_prop
+  end
+end
+
+class type buffer = object
+  method toString: js_string t meth
 end
 
 class type t = object
@@ -83,13 +96,94 @@ class type t = object
   method lstatSync: js_string Js.t -> stat Js.t meth
   method readlinkSync: js_string Js.t -> js_string Js.t meth
   method readdirSync: js_string Js.t -> js_string Js.t js_array Js.t meth
-  method readFileSync: js_string Js.t -> js_string Js.t meth
+  method readFileSync: js_string Js.t -> buffer Js.t meth
+
+  method writeFileSync: js_string Js.t -> js_string Js.t -> unit meth
+  method mkdirSync: js_string Js.t -> unit meth
+  method rmdirSync: js_string Js.t -> unit meth
+  method unlinkSync: js_string Js.t -> unit meth
+
+  method createReadStream: js_string Js.t -> Option.create_read_stream Js.t optdef -> Stream.readable Js.t meth
+  method createWriteStream: js_string Js.t -> Option.create_write_stream Js.t optdef -> Stream.writeable Js.t meth
 end
 
 let t : unit -> t Js.t = fun () -> Inner_util.require "fs"
 
 let lstatSync path = let fs = t () in fs##lstatSync (Js.string path)
-let readFileSync path = let fs = t () in fs##readFileSync (Js.string path) |> Js.to_string
+let readFileSync path = let fs = t () in
+  let buffer = fs##readFileSync (Js.string path) in
+  Js.to_string buffer##toString
 let readdirSync path = let fs = t () in fs##readdirSync (Js.string path) |> Js.to_array |> Array.map Js.to_string
 let readlinkSync path = let fs = t () in fs##readlinkSync (Js.string path) |> Js.to_string
 let statSync path = let fs = t () in fs##statSync (Js.string path)
+
+let writeFileSync path data = let fs = t () in fs##writeFileSync (Js.string path) (Js.string data)
+let mkdirSync path = let fs = t () in fs##mkdirSync (Js.string path)
+let rmdirSync path = let fs = t () in fs##rmdirSync (Js.string path)
+let unlinkSync path = let fs = t () in fs##unlinkSync (Js.string path)
+
+let mode_to_int list =
+  List.fold_left (fun v mode ->
+      match mode with
+      | `AllowOwnerRead -> v lor 0o400
+      | `AllowOwnerWrite -> v lor 0o200
+      | `AllowOwnerExec -> v lor 0o100
+      | `AllowOwnerAll -> v lor 0o700
+      | `AllowGroupRead -> v lor 0o40
+      | `AllowGroupWrite -> v lor 0o20
+      | `AllowGroupExec -> v lor 0o10
+      | `AllowGroupAll -> v lor 0o70
+      | `AllowOthersRead -> v lor 0o4
+      | `AllowOthersWrite -> v lor 0o2
+      | `AllowOthersExec -> v lor 0o1
+      | `AllowOthersAll -> v lor 0o7
+    ) 0 list
+
+let removeSync path =
+  let is_directory path = let stat = statSync path in Js.to_bool stat##isDirectory in
+
+  let rec remove path_list =
+    match path_list with
+    | [] -> ()
+    | path :: rest -> begin
+        if is_directory path then begin
+          let files = readdirSync path
+                      |> Array.map (fun p -> Path.join [path;p])
+                      |> Array.to_list
+          in remove files;
+          rmdirSync path
+        end else
+          unlinkSync path;
+        remove rest
+      end
+  in
+  remove [Path.resolve [path]]
+
+let copyFile ?mode ~src ~dest () =
+  let mode = match mode with
+    | None -> mode_to_int [`AllowOwnerRead;`AllowOwnerWrite; `AllowGroupRead;`AllowGroupWrite;`AllowOthersRead]
+    | Some mode -> mode_to_int mode
+  in
+  let fs = t () in
+  let r = fs##createReadStream Js.(string src) Js.Optdef.empty
+  and w = fs##createWriteStream Js.(string dest) Js.Optdef.(
+      return (object%js
+        val flags = Optdef.empty
+        val encoding = Optdef.empty
+        val fd = Optdef.empty
+        val autoClose = Optdef.empty
+        val start = Optdef.empty
+        val mode = Js.Optdef.return mode
+      end))
+  in
+  let wait, waker = Lwt.wait () in
+  let error_channel = Js.string "error" in
+  let close_channel = Js.string "close" in
+  let error_handler err = Lwt.wakeup waker (Pervasives.Error (`FsCopyError (Js.to_string err))) in
+  r##on error_channel (wrap_callback error_handler);
+  w##on error_channel (wrap_callback error_handler);
+  w##on close_channel (wrap_callback @@ fun _ -> Lwt.wakeup waker (Ok ()));
+
+  r##pipe w |> ignore;
+
+  wait
