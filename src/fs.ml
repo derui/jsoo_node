@@ -102,6 +102,7 @@ class type t = object
   method mkdirSync: js_string Js.t -> unit meth
   method rmdirSync: js_string Js.t -> unit meth
   method unlinkSync: js_string Js.t -> unit meth
+  method existsSync: js_string Js.t -> bool Js.t meth
 
   method createReadStream: js_string Js.t -> Option.create_read_stream Js.t optdef -> Stream.readable Js.t meth
   method createWriteStream: js_string Js.t -> Option.create_write_stream Js.t optdef -> Stream.writeable Js.t meth
@@ -109,18 +110,40 @@ end
 
 let t : unit -> t Js.t = fun () -> Inner_util.require "fs"
 
-let lstatSync path = let fs = t () in fs##lstatSync (Js.string path)
+let wrap_error f =
+  try
+    Ok (f ())
+  with e -> Pervasives.Error e
+
+let lstatSync path =
+  let fs = t () in
+  wrap_error (fun () -> fs##lstatSync (Js.string path))
+
 let readFileSync path = let fs = t () in
+  wrap_error @@ fun () ->
   let buffer = fs##readFileSync (Js.string path) in
   Js.to_string buffer##toString
-let readdirSync path = let fs = t () in fs##readdirSync (Js.string path) |> Js.to_array |> Array.map Js.to_string
-let readlinkSync path = let fs = t () in fs##readlinkSync (Js.string path) |> Js.to_string
-let statSync path = let fs = t () in fs##statSync (Js.string path)
 
-let writeFileSync path data = let fs = t () in fs##writeFileSync (Js.string path) (Js.string data)
-let mkdirSync path = let fs = t () in fs##mkdirSync (Js.string path)
-let rmdirSync path = let fs = t () in fs##rmdirSync (Js.string path)
-let unlinkSync path = let fs = t () in fs##unlinkSync (Js.string path)
+let readdirSync path =
+  let fs = t () in
+  wrap_error @@ fun () -> fs##readdirSync (Js.string path) |> Js.to_array |> Array.map Js.to_string
+
+let readlinkSync path =
+  let fs = t () in
+  wrap_error @@ fun () -> fs##readlinkSync (Js.string path) |> Js.to_string
+
+let statSync path =
+  let fs = t () in
+  wrap_error (fun () -> fs##statSync (Js.string path))
+
+let writeFileSync path data =
+  let fs = t () in
+  wrap_error @@ fun () -> fs##writeFileSync (Js.string path) (Js.string data)
+
+let mkdirSync path = let fs = t () in wrap_error @@ fun () -> fs##mkdirSync (Js.string path)
+let rmdirSync path = let fs = t () in wrap_error @@ fun () -> fs##rmdirSync (Js.string path)
+let unlinkSync path = let fs = t () in wrap_error @@ fun () -> fs##unlinkSync (Js.string path)
+let existsSync path = let fs = t () in fs##existsSync (Js.string path) |> Js.to_bool
 
 let mode_to_int list =
   List.fold_left (fun v mode ->
@@ -139,27 +162,30 @@ let mode_to_int list =
       | `AllowOthersAll -> v lor 0o7
     ) 0 list
 
-let removeSync path =
-  let is_directory path = let stat = statSync path in Js.to_bool stat##isDirectory in
+let remove_sync path =
+  let open Inner_util.Result_infix in
 
+  let is_directory path = statSync path >|= fun stat -> Js.to_bool stat##isDirectory in
   let rec remove path_list =
     match path_list with
-    | [] -> ()
+    | [] -> Ok ()
     | path :: rest -> begin
-        if is_directory path then begin
-          let files = readdirSync path
-                      |> Array.map (fun p -> Path.join [path;p])
-                      |> Array.to_list
-          in remove files;
-          rmdirSync path
-        end else
-          unlinkSync path;
-        remove rest
+        is_directory path >>= (fun is_directory ->
+            if is_directory then begin
+              readdirSync path
+              >|= Array.map (fun p -> Path.join [path;p])
+              >|= Array.to_list
+              >>= remove
+              >>= fun () -> rmdirSync path
+            end else
+              unlinkSync path
+          )
+        >>= fun () -> remove rest
       end
   in
   remove [Path.resolve [path]]
 
-let copyFile ?mode ~src ~dest () =
+let copy_file ?mode ~src ~dest () =
   let mode = match mode with
     | None -> mode_to_int [`AllowOwnerRead;`AllowOwnerWrite; `AllowGroupRead;`AllowGroupWrite;`AllowOthersRead]
     | Some mode -> mode_to_int mode
@@ -179,7 +205,7 @@ let copyFile ?mode ~src ~dest () =
   let wait, waker = Lwt.wait () in
   let error_channel = Js.string "error" in
   let close_channel = Js.string "close" in
-  let error_handler err = Lwt.wakeup waker (Pervasives.Error (`FsCopyError (Js.to_string err))) in
+  let error_handler err = Lwt.wakeup waker (Pervasives.Error (`FsCopyError err)) in
   r##on error_channel (wrap_callback error_handler);
   w##on error_channel (wrap_callback error_handler);
   w##on close_channel (wrap_callback @@ fun _ -> Lwt.wakeup waker (Ok ()));

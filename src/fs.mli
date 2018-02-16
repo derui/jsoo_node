@@ -48,19 +48,27 @@ end
 (** Convert stat class to plain javascript object *)
 val stat_to_obj : stat Js.t -> stat_obj Js.t
 
-val lstatSync : string -> stat Js.t
-val readFileSync : string -> string
-val readdirSync : string -> string array
-val readlinkSync : string -> string
-val statSync : string -> stat Js.t
-val writeFileSync: string -> string -> unit
-val mkdirSync: string -> unit
-val rmdirSync: string -> unit
-val unlinkSync: string -> unit
-val removeSync: string -> unit
+(**
+   shallow direct bindings of fs.
+   All bindings would not throw any exception, but user should handling result.
+*)
+val lstatSync : string -> (stat Js.t, exn) result
+val readFileSync : string -> (string, exn) result
+val readdirSync : string -> (string array, exn) result
+val readlinkSync : string -> (string, exn) result
+val statSync : string -> (stat Js.t, exn) result
+val writeFileSync: string -> string -> (unit, exn) result
+val mkdirSync: string -> (unit, exn) result
+val rmdirSync: string -> (unit, exn) result
+val unlinkSync: string -> (unit, exn) result
+val existsSync: string -> bool
 
-(** Copy src file to dest *)
-val copyFile:
+(**
+   jsoo_node original functions
+*)
+
+(** Copy src file to dest. This operation should be atomic. *)
+val copy_file:
   ?mode:[ `AllowOwnerRead
         | `AllowOwnerWrite
         | `AllowOwnerExec
@@ -75,4 +83,7 @@ val copyFile:
         | `AllowOthersAll
         ] list
   -> src:string -> dest:string
-  -> unit -> (unit, [> `FsCopyError of string]) result Lwt.t
+  -> unit -> (unit, [> `FsCopyError of exn]) result Lwt.t
+
+(** Remove file/directory all. *)
+val remove_sync: string -> (unit, exn) result
