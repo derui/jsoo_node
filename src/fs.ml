@@ -81,7 +81,7 @@ let mode_to_int list =
     ) 0 list
 
 let remove_sync path =
-  let open Inner_util.Result_infix in
+  let open Minimal_monadic_caml.Result.Infix in
 
   let is_directory path = statSync path >|= fun stat -> Js.to_bool stat##isDirectory in
   let rec remove path_list =

@@ -9,11 +9,15 @@ bug-reports: "https://github.com/derui/jsoo_node/issues"
 dev-repo: "https://github.com/derui/jsoo_node"
 tags: []
 build: [
-  "jbuilder" "build" "-p" name "-j" jobs
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]
+build-test: [
+  ["jbuilder" "runt" "-p" name ]
 ]
 depends: [
   "jbuilder" { >= "1.0+beta16"}
   "ocamlfind"
+  "jsoo_node"
   "js_of_ocaml" { >= "3.0.2"}
   "js_of_ocaml-ppx" { >= "3.0.2"}
   "mocha_of_ocaml" { "test" }
