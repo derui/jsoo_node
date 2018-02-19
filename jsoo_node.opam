@@ -11,13 +11,12 @@ tags: []
 build: [
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
-build-test: [
+test: [
   ["jbuilder" "runt" "-p" name ]
 ]
 depends: [
   "jbuilder" { >= "1.0+beta16"}
   "ocamlfind"
-  "jsoo_node"
   "js_of_ocaml" { >= "3.0.2"}
   "js_of_ocaml-ppx" { >= "3.0.2"}
   "mocha_of_ocaml" { "test" }
