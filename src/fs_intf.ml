@@ -42,7 +42,7 @@ module type S = sig
           | `AllowOthersAll
           ] list
     -> src:string -> dest:string
-    -> unit -> (unit, [> `FsCopyError of exn]) result Lwt.t
+    -> unit -> (unit, [> `FsCopyError of Js.error]) result Lwt.t
 
   (** Remove file/directory all. *)
   val remove_sync: string -> (unit, exn) result
