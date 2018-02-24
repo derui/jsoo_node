@@ -62,6 +62,9 @@ module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
   let rmdirSync path = let fs = Fs.instance in wrap_error @@ fun () -> fs##rmdirSync (Js.string path)
   let unlinkSync path = let fs = Fs.instance in wrap_error @@ fun () -> fs##unlinkSync (Js.string path)
   let existsSync path = let fs = Fs.instance in fs##existsSync (Js.string path) |> Js.to_bool
+  let renameSync oldpath newpath =
+    let fs = Fs.instance in
+    wrap_error @@ fun () -> fs##renameSync (Js.string oldpath) (Js.string newpath)
 
   let mode_to_int list =
     List.fold_left (fun v mode ->

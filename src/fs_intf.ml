@@ -21,6 +21,7 @@ module type S = sig
   val rmdirSync: string -> (unit, exn) result
   val unlinkSync: string -> (unit, exn) result
   val existsSync: string -> bool
+  val renameSync: string -> string -> (unit, exn) result
 
   (**
      jsoo_node original functions

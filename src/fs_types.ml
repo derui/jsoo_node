@@ -81,6 +81,7 @@ class type t = object
   method rmdirSync: js_string Js.t -> unit meth
   method unlinkSync: js_string Js.t -> unit meth
   method existsSync: js_string Js.t -> bool Js.t meth
+  method renameSync: js_string Js.t -> js_string Js.t -> unit meth
 
   method createReadStream: js_string Js.t -> Option.create_read_stream Js.t optdef -> Stream.readable Js.t meth
   method createWriteStream: js_string Js.t -> Option.create_write_stream Js.t optdef -> Stream.writeable Js.t meth

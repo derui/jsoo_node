@@ -59,5 +59,14 @@ let suite () =
         | Ok data -> let data = Js.string data in
           Lwt.return @@ (assert_ok (ret = Ok ()) <|> assert_eq Js.(string "data") data)
         | _ -> Lwt.return @@ assert_fail "Error occured"
-      )
+      );
+    "can rename file" >:: (fun () ->
+        let src = J.Path.resolve [".";"tmp";"copy_src.txt"] in
+        let dest = J.Path.resolve [".";"tmp";"rename_src.txt"] in
+
+        J.Fs.renameSync src dest |> ignore;
+
+        let open Infix in
+        assert_ok J.Fs.(existsSync dest) <|> assert_not_ok J.Fs.(existsSync src)
+      );
   ]
