@@ -1,5 +1,5 @@
 module type Instance = sig
-  val instance : Fs_types.t Js.t
+  val instance : Module_types.fs Js.t
 end
 
 module type S = sig

@@ -2,7 +2,7 @@
 open Js
 module T = Fs_types
 
-let fs : unit -> T.t Js.t = fun () -> Inner_util.require "fs"
+let fs : unit -> Module_types.fs Js.t = fun () -> Inner_util.require "fs"
 
 module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
 

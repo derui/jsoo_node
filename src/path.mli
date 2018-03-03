@@ -2,7 +2,14 @@
     This library would not provide raw bindings such as [path##join ...]. Provide only OCaml friendly
     interface instead.
 *)
+open Path_intf
 
-val join: string list -> string
-val resolve: string list -> string
-val sep: string
+include S
+
+(** POSIX specific implementations *)
+val posix: (module S)
+
+(** win32 specific implementations *)
+val win32: (module S)
+
+module Make(Path:Instance) : S
