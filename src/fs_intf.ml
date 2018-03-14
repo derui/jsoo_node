@@ -11,17 +11,17 @@ module type S = sig
      shallow direct bindings of fs.
      All bindings would not throw any exception, but user should handling result.
   *)
-  val lstatSync : string -> (Fs_types.stat Js.t, exn) result
-  val readFileSync : string -> (string, exn) result
-  val readdirSync : string -> (string array, exn) result
-  val readlinkSync : string -> (string, exn) result
-  val statSync : string -> (Fs_types.stat Js.t, exn) result
-  val writeFileSync: string -> string -> (unit, exn) result
-  val mkdirSync: string -> (unit, exn) result
-  val rmdirSync: string -> (unit, exn) result
-  val unlinkSync: string -> (unit, exn) result
+  val lstatSync : string -> (Fs_types.stat Js.t, Errors.t) result
+  val readFileSync : string -> (string, Errors.t) result
+  val readdirSync : string -> (string array, Errors.t) result
+  val readlinkSync : string -> (string, Errors.t) result
+  val statSync : string -> (Fs_types.stat Js.t, Errors.t) result
+  val writeFileSync: string -> string -> (unit, Errors.t) result
+  val mkdirSync: string -> (unit, Errors.t) result
+  val rmdirSync: string -> (unit, Errors.t) result
+  val unlinkSync: string -> (unit, Errors.t) result
   val existsSync: string -> bool
-  val renameSync: string -> string -> (unit, exn) result
+  val renameSync: string -> string -> (unit, Errors.t) result
 
   (**
      jsoo_node original functions
@@ -43,8 +43,8 @@ module type S = sig
           | `AllowOthersAll
           ] list
     -> src:string -> dest:string
-    -> unit -> (unit, [> `FsCopyError of Js.error Js.t]) result Lwt.t
+    -> unit -> (unit, Errors.t) result Lwt.t
 
   (** Remove file/directory all. *)
-  val remove_sync: string -> (unit, exn) result
+  val remove_sync: string -> (unit, Errors.t) result
 end

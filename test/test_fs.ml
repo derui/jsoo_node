@@ -32,6 +32,16 @@ let suite () =
         | _ -> assert_fail "Error  occured"
       );
 
+    "should be able to handle error is thrown from nodejs" >:: (fun () ->
+        let v = J.Fs.lstatSync @@ J.Path.resolve [".";"tmp";"not_found.txt"] in
+        match v with
+        | Error `JsooSystemError e ->
+          let open Infix in
+          let module E = J.Errors.System_error in
+          assert_eq (Js.string "ENOENT") e##.code <|> assert_eq E.ENOENT (E.to_code e)
+        | _ -> assert_fail "Should be failed"
+      );
+
     before_each (fun () ->
         let dir = J.Path.resolve [".";"tmp"] in
         let src = J.Path.join [dir;"copy_src.txt"] in

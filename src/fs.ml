@@ -28,10 +28,15 @@ module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
     val isSymbolicLink = t##isSymbolicLink
   end
 
+  let exn_to_error = function
+    | Js.Error e ->
+      let err : Errors.System_error.t Js.t = Js.Unsafe.coerce e in `JsooSystemError err
+    | e -> failwith (Printf.sprintf "Unknown exception: %s" @@ Printexc.to_string e)
+
   let wrap_error f =
     try
       Ok (f ())
-    with e -> Pervasives.Error e
+    with e -> Pervasives.Error (exn_to_error e)
 
   let lstatSync path =
     let fs = Fs.instance in
@@ -126,7 +131,7 @@ module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
     let wait, waker = Lwt.wait () in
     let error_channel = Js.string "error" in
     let close_channel = Js.string "close" in
-    let error_handler err = Lwt.wakeup waker (Pervasives.Error (`FsCopyError err)) in
+    let error_handler err = Lwt.wakeup waker (Pervasives.Error (exn_to_error err)) in
     r##on error_channel (wrap_callback error_handler);
     w##on error_channel (wrap_callback error_handler);
     w##on close_channel (wrap_callback @@ fun _ -> Lwt.wakeup waker (Ok ()));
