@@ -22,6 +22,7 @@ module type S = sig
   val unlinkSync: string -> (unit, Errors.t) result
   val existsSync: string -> bool
   val renameSync: string -> string -> (unit, Errors.t) result
+  val chmodSync: string -> int -> (unit, Errors.t) result
 
   (**
      jsoo_node original functions

@@ -70,6 +70,9 @@ module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
   let renameSync oldpath newpath =
     let fs = Fs.instance in
     wrap_error @@ fun () -> fs##renameSync (Js.string oldpath) (Js.string newpath)
+  let chmodSync path permission =
+    let fs = Fs.instance in
+    wrap_error @@ fun () -> fs##chmodSync (Js.string path) permission
 
   let mode_to_int list =
     List.fold_left (fun v mode ->

@@ -14,6 +14,7 @@ class type fs = object
   method unlinkSync: js_string t -> unit meth
   method existsSync: js_string t -> bool t meth
   method renameSync: js_string t -> js_string t -> unit meth
+  method chmodSync: js_string t -> int -> unit meth
 
   method createReadStream: js_string t -> Fs_types.Option.create_read_stream t optdef -> Stream.readable t meth
   method createWriteStream: js_string t -> Fs_types.Option.create_write_stream t optdef -> Stream.writeable t meth
