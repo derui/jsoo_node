@@ -9,11 +9,11 @@ bug-reports: "https://github.com/derui/jsoo_node/issues"
 dev-repo: "git+https://github.com/derui/jsoo_node"
 tags: []
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs]
-  ["jbuilder" "runtest" "-p" name] {with-test}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
 ]
 depends: [
-  "jbuilder" {build & >= "1.0+beta16"}
+  "dune" {build & >= "1.0.0"}
   "js_of_ocaml" { >= "3.0.2"}
   "js_of_ocaml-ppx" { >= "3.0.2"}
   "mocha_of_ocaml" { "test" }
