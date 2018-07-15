@@ -1,6 +1,4 @@
 (** Bindings for nodejs's path module *)
-open Js
-
 let path : unit -> Module_types.path Js.t = fun () -> Inner_util.require "path"
 
 module Make(Path:Path_intf.Instance) : Path_intf.S = struct

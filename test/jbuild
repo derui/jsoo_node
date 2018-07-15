@@ -8,6 +8,6 @@
 
 (executable
  ((name test_all)
-  (libraries (js_of_ocaml jsoo_node mocha_of_ocaml))
+  (libraries (js_of_ocaml jsoo_node mocha_of_ocaml mocha_of_ocaml.async))
   (js_of_ocaml ((flags ("--pretty" "--source-map-inline"))))
   (preprocess (pps (js_of_ocaml-ppx)))))
