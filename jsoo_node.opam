@@ -1,6 +1,6 @@
 
 opam-version: "2.0"
-version: "0.1.0"
+version: "0.1.1"
 maintainer: "derutakayu@gmail.com"
 authors: "derui"
 license: "MIT"
@@ -18,6 +18,5 @@ depends: [
   "js_of_ocaml-ppx" { >= "3.0.2"}
   "mocha_of_ocaml" { "test" }
   "lwt" { >= "3.2.0"}
-  "minimal-monadic-caml"
 ]
 available: ["ocaml" >= "4.05.0"]

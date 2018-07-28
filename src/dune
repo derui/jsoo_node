@@ -1,5 +1,5 @@
 (library
  (name jsoo_node)
  (public_name jsoo_node)
- (libraries js_of_ocaml lwt minimal-monadic-caml)
+ (libraries js_of_ocaml lwt)
  (preprocess (pps js_of_ocaml-ppx)))

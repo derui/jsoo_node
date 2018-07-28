@@ -92,8 +92,13 @@ module Make(Fs:Fs_intf.Instance) : Fs_intf.S = struct
       ) 0 list
 
   let remove_sync path =
-    let open Minimal_monadic_caml.Result.Infix in
-
+    let (>|=) v f = match v with
+      | Ok v -> Ok (f v)
+      | Error _ as v -> v
+    and (>>=) v f = match v with
+      | Ok v -> f v
+      | Error _ as v -> v
+    in
     let is_directory path = statSync path >|= fun stat -> Js.to_bool stat##isDirectory in
     let rec remove path_list =
       match path_list with
